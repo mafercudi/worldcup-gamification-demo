@@ -56,11 +56,6 @@ function mergeConfig(base, override) {
       ...(override.eventEndpoint || {})
     },
 
-    /*
-      Importante:
-      No tomamos wheelItems desde localStorage para evitar premios viejos
-      como 75 puntos o labels anteriores guardados en el navegador.
-    */
     teams: clone(base.teams),
     wheelItems: clone(base.wheelItems)
   };
@@ -72,7 +67,7 @@ const { Wheel } = spinWheel;
 const qs = new URLSearchParams(window.location.search);
 
 const state = {
-  userRef: qs.get("user_ref") || qs.get("wa_id") || qs.get("phone") || "demo_user",
+  userRef: qs.get("user_ref") || qs.get("wa_id") || qs.get("phone") || qs.get("customer_id") || "demo_user",
   playerName: qs.get("name") || "",
   campaignId: qs.get("campaign_id") || APP_CONFIG.campaign.campaignId,
   selectedTeam: qs.get("team") || "",
@@ -251,11 +246,6 @@ function createWheel() {
     radius: 0.92,
 
     isInteractive: false,
-
-    /*
-      El puntero visual está arriba.
-      pointerAngle: 0 evita que el resultado se lea como si el indicador estuviera a la izquierda.
-    */
     pointerAngle: 0,
 
     onSpin: () => {
@@ -265,10 +255,6 @@ function createWheel() {
     },
 
     onRest: () => {
-      /*
-        No usamos event.currentIndex.
-        Usamos el índice que nosotros elegimos antes de girar.
-      */
       handleWheelResult(state.pendingRewardIndex);
     }
   };
@@ -280,7 +266,6 @@ function spinWheelControlled() {
   if (!state.selectedTeam || state.isSpinning || state.hasPlayed) return;
 
   const winningItemIndex = getRandomWinningIndex();
-
   state.pendingRewardIndex = winningItemIndex;
 
   const duration = 3800;
@@ -327,11 +312,11 @@ function handleWheelResult(rewardIndex) {
 function buildCustomEventPayload(pointsAwarded) {
   return {
     event_name: APP_CONFIG.event.eventName,
-    user_ref: state.userRef,
+    event_time: new Date().toISOString(),
+    customer_id: state.userRef,
     campaign_id: state.campaignId,
     team_selected: state.selectedTeam,
-    points_awarded: pointsAwarded,
-    event_time: new Date().toISOString()
+    points_awarded: pointsAwarded
   };
 }
 
