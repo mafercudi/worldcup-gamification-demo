@@ -67,7 +67,13 @@ const { Wheel } = spinWheel;
 const qs = new URLSearchParams(window.location.search);
 
 const state = {
-  userRef: qs.get("user_ref") || qs.get("wa_id") || qs.get("phone") || qs.get("customer_id") || "demo_user",
+  customerId:
+    qs.get("customer_id") ||
+    qs.get("user_ref") ||
+    qs.get("wa_id") ||
+    qs.get("phone") ||
+    "demo_user",
+
   playerName: qs.get("name") || "",
   campaignId: qs.get("campaign_id") || APP_CONFIG.campaign.campaignId,
   selectedTeam: qs.get("team") || "",
@@ -266,6 +272,7 @@ function spinWheelControlled() {
   if (!state.selectedTeam || state.isSpinning || state.hasPlayed) return;
 
   const winningItemIndex = getRandomWinningIndex();
+
   state.pendingRewardIndex = winningItemIndex;
 
   const duration = 3800;
@@ -313,10 +320,13 @@ function buildCustomEventPayload(pointsAwarded) {
   return {
     event_name: APP_CONFIG.event.eventName,
     event_time: new Date().toISOString(),
-    customer_id: state.userRef,
-    campaign_id: state.campaignId,
-    team_selected: state.selectedTeam,
-    points_awarded: pointsAwarded
+    customer_id: state.customerId,
+    source: APP_CONFIG.campaign.source,
+    user: {
+      team_selected: state.selectedTeam,
+      points_awarded: pointsAwarded,
+      campaign_id: state.campaignId
+    }
   };
 }
 
@@ -337,11 +347,17 @@ function emitPayload(payload) {
 
 async function sendEventToEndpoint(payload) {
   try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+
+    if (APP_CONFIG.eventEndpoint.authToken) {
+      headers.Authorization = APP_CONFIG.eventEndpoint.authToken;
+    }
+
     await fetch(APP_CONFIG.eventEndpoint.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers,
       body: JSON.stringify(payload)
     });
   } catch (error) {
