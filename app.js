@@ -46,6 +46,11 @@ function mergeConfig(base, override) {
       ...(override.campaign || {})
     },
 
+    event: {
+      ...base.event,
+      ...(override.event || {})
+    },
+
     eventEndpoint: {
       ...base.eventEndpoint,
       ...(override.eventEndpoint || {})
@@ -248,10 +253,8 @@ function createWheel() {
     isInteractive: false,
 
     /*
-      Corrección clave:
-      Antes estaba en 270 y la librería estaba resolviendo el resultado
-      como si el indicador estuviera en otra posición.
-      Con 0, el spinToItem alinea el premio visual con el puntero superior.
+      El puntero visual está arriba.
+      pointerAngle: 0 evita que el resultado se lea como si el indicador estuviera a la izquierda.
     */
     pointerAngle: 0,
 
@@ -263,10 +266,8 @@ function createWheel() {
 
     onRest: () => {
       /*
-        Corrección clave:
-        No usamos event.currentIndex porque estaba leyendo otro punto
-        de referencia de la rueda. Usamos el índice que nosotros elegimos
-        antes de girar.
+        No usamos event.currentIndex.
+        Usamos el índice que nosotros elegimos antes de girar.
       */
       handleWheelResult(state.pendingRewardIndex);
     }
@@ -325,11 +326,12 @@ function handleWheelResult(rewardIndex) {
 
 function buildCustomEventPayload(pointsAwarded) {
   return {
-    event_name: "worldcup_game_completed",
+    event_name: APP_CONFIG.event.eventName,
     user_ref: state.userRef,
     campaign_id: state.campaignId,
     team_selected: state.selectedTeam,
-    points_awarded: pointsAwarded
+    points_awarded: pointsAwarded,
+    event_time: new Date().toISOString()
   };
 }
 
