@@ -13,46 +13,52 @@
   <main class="page-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Mundial Fan Challenge</p>
+        <p class="eyebrow" id="campaign-eyebrow">Mundial Fan Challenge</p>
         <h1 id="campaign-title">Gira, suma puntos y desbloquea premios</h1>
+        <p id="campaign-subtitle">
+          Vive una experiencia personalizada, acumula puntos y desbloquea recompensas para tu selección.
+        </p>
       </div>
 
       <div class="brand-box">
         <span class="brand-label">Demo by</span>
         <img id="brand-logo" src="" alt="Logo de la marca" />
+        <a class="admin-link" href="./admin.html">Admin</a>
       </div>
     </header>
 
     <section class="hero">
-      <div class="hero-copy">
+      <div class="panel">
         <p class="tag">⚽ Experiencia mundialista personalizada</p>
-        <h2>Elige tu selección, gira la ruleta y gana puntos para desbloquear recompensas.</h2>
+        <h2>Elige tu selección, gira la ruleta y gana puntos.</h2>
         <p>
-          Esta demo simula cómo una campaña de WhatsApp puede redirigir a un micrositio,
-          capturar eventos de comportamiento y generar segmentos dinámicos para futuras campañas.
+          Esta experiencia simula cómo una campaña de WhatsApp puede redirigir a un micrositio,
+          capturar eventos de comportamiento y generar segmentos dinámicos para próximas campañas.
         </p>
 
-        <div class="brand-editor">
-          <h3>Branding de la demo</h3>
+        <div class="mini-metrics">
+          <div>
+            <span id="metric-team">—</span>
+            <small>Selección</small>
+          </div>
+          <div>
+            <span id="metric-score">0</span>
+            <small>Puntos</small>
+          </div>
+          <div>
+            <span id="metric-segment">—</span>
+            <small>Segmento</small>
+          </div>
+        </div>
 
-          <label>
-            Nombre de marca
-            <input id="brand-name-input" type="text" placeholder="Ej. Banco Demo" />
-          </label>
-
-          <label>
-            URL del logo
-            <input id="brand-logo-input" type="text" placeholder="https://..." />
-          </label>
-
-          <label>
-            Color principal
-            <input id="brand-color-input" type="color" />
-          </label>
-
-          <button id="apply-brand-btn" class="secondary-btn">
-            Aplicar branding
-          </button>
+        <div class="how-it-works">
+          <h3>Qué está pasando detrás</h3>
+          <ol>
+            <li>El usuario llega desde WhatsApp con `wa_id` y `campaign_id`.</li>
+            <li>Cada interacción genera un evento.</li>
+            <li>El evento calcula puntos, segmento y siguiente acción.</li>
+            <li>El payload queda listo para una custom integration.</li>
+          </ol>
         </div>
       </div>
 
@@ -88,6 +94,7 @@
           <p class="result-label">Resultado</p>
           <h3 id="result-title"></h3>
           <p id="result-description"></p>
+
           <button id="return-whatsapp-btn" class="secondary-btn">
             Volver a WhatsApp
           </button>
@@ -100,8 +107,8 @@
         <p class="eyebrow">Event payload</p>
         <h2>Evento listo para custom integration</h2>
         <p>
-          Este JSON es el payload que después podrás enviar a Gupshup, Apps Script,
-          Supabase o a una integración custom para segmentación y campañas.
+          Este JSON es el payload que después podrás enviar a Gupshup,
+          Apps Script, Supabase o a una integración custom para segmentación y campañas.
         </p>
       </div>
 
