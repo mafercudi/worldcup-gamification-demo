@@ -9,103 +9,116 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
-<body class="worldcup-body">
-  <div class="bg-mesh bg-mesh-1"></div>
-  <div class="bg-mesh bg-mesh-2"></div>
-  <div class="bg-mesh bg-mesh-3"></div>
+<body>
+  <main class="site-shell">
+    <nav class="top-nav">
+      <div class="nav-left">
+        <div class="mini-trophy">26</div>
+        <span class="nav-divider"></span>
+        <span class="nav-kicker">Fan Challenge</span>
+      </div>
 
-  <main class="page-shell">
-    <header class="topbar worldcup-topbar">
-      <div class="title-block">
-        <p class="eyebrow" id="campaign-eyebrow">Mundial Fan Challenge</p>
-        <h1 id="campaign-title">Gira, suma puntos y desbloquea premios</h1>
+      <div class="nav-center">
+        <a href="#game">Play</a>
+        <a href="#teams">Teams</a>
+        <a href="#rewards">Rewards</a>
+        <a href="./admin.html">Admin</a>
+      </div>
+
+      <div class="brand-box">
+        <img id="brand-logo" src="" alt="Logo de la marca" />
+      </div>
+    </nav>
+
+    <section class="hero-section">
+      <div class="floating-photo photo-one"></div>
+      <div class="floating-photo photo-two"></div>
+      <div class="floating-photo photo-three"></div>
+
+      <div class="hero-content">
+        <div class="countdown-row">
+          <div>
+            <strong>25</strong>
+            <span>Days</span>
+          </div>
+          <div>
+            <strong>00</strong>
+            <span>Hours</span>
+          </div>
+          <div>
+            <strong>49</strong>
+            <span>Minutes</span>
+          </div>
+          <div>
+            <strong>20</strong>
+            <span>Seconds</span>
+          </div>
+        </div>
+
+        <p class="eyebrow" id="campaign-eyebrow">Fan Engagement Experience</p>
+
+        <h1 id="campaign-title">
+          Mundial Fan Challenge
+        </h1>
+
         <p id="campaign-subtitle" class="hero-subtitle">
-          Vive una experiencia personalizada, acumula puntos y desbloquea recompensas para tu selección.
+          Elige la selección que apoyas, gira la ruleta y desbloquea recompensas personalizadas.
         </p>
 
-        <div class="host-strip">
-          <span class="host-chip">⚽ Football Fan Experience</span>
-          <span class="host-chip">🌎 Global Tournament Energy</span>
-          <span class="host-chip">🏟️ Inspired by 2026 host-city vibes</span>
+        <div class="hero-actions">
+          <a href="#game" class="primary-link">Jugar ahora</a>
+          <a href="#teams" class="secondary-link">Elegir selección</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="browse-section" id="teams">
+      <div class="browse-header">
+        <div>
+          <p class="section-kicker">Browse</p>
+          <h2>Elige tu selección</h2>
+        </div>
+
+        <div class="tabs">
+          <span class="active">Team</span>
+          <span>Rewards</span>
         </div>
       </div>
 
-      <div class="brand-box brand-box-worldcup">
-        <span class="brand-label">Demo by</span>
-        <img id="brand-logo" src="" alt="Logo de la marca" />
-        <a class="admin-link" href="./admin.html">Admin</a>
-      </div>
-    </header>
+      <label class="team-search-label">
+        Buscar selección
+        <input id="team-search" type="text" placeholder="Ej. México, Brasil, Argentina..." />
+      </label>
 
-    <section class="hero worldcup-hero">
-      <div class="panel panel-hero">
-        <div class="panel-badge-row">
-          <span class="hero-kicker">Fan Activation</span>
-          <span class="hero-kicker alt">WhatsApp + Microsite</span>
+      <div id="team-selector" class="team-strip scrollable-team-grid"></div>
+    </section>
+
+    <section class="experience-section" id="game">
+      <div class="visual-card">
+        <div class="shape-card">
+          <div class="shape-photo"></div>
         </div>
+      </div>
 
-        <p class="tag">⚽ Experiencia mundialista personalizada</p>
-        <h2>Elige tu selección, gira la ruleta y gana puntos.</h2>
+      <div class="game-card">
+        <p class="section-kicker">Matchday Game</p>
+        <h2>Gira la ruleta y suma puntos</h2>
         <p>
-          Esta experiencia simula cómo una campaña de WhatsApp puede redirigir a un micrositio,
-          capturar preferencias del usuario y crear segmentos para próximas campañas.
+          Cada interacción crea un segmento de audiencia basado en la selección que apoya el usuario.
         </p>
 
         <div class="mini-metrics">
-          <div class="metric-card">
+          <div>
             <span id="metric-team">—</span>
             <small>Selección</small>
           </div>
-          <div class="metric-card">
+          <div>
             <span id="metric-score">0</span>
             <small>Puntos</small>
           </div>
-          <div class="metric-card">
+          <div>
             <span id="metric-segment">—</span>
             <small>Segmento</small>
-          </div>
-        </div>
-
-        <div class="how-it-works worldcup-info-box">
-          <h3>Tu experiencia</h3>
-          <ol>
-            <li>Elige la selección que apoyas.</li>
-            <li>Gira la ruleta.</li>
-            <li>Acumula puntos.</li>
-            <li>Desbloquea recompensas personalizadas.</li>
-          </ol>
-        </div>
-      </div>
-
-      <div class="game-card game-card-worldcup">
-        <div class="game-card-header">
-          <div>
-            <p class="tag small-tag">Matchday Challenge</p>
-            <h3 class="game-title">Fan Game Zone</h3>
-          </div>
-          <div class="hero-ball">26</div>
-        </div>
-
-        <div class="step-card">
-          <span class="step-number">1</span>
-          <div>
-            <h3>Elige tu selección</h3>
-            <p>Selecciona el equipo que apoyas en el Mundial.</p>
-          </div>
-        </div>
-
-        <label class="team-search-label">
-          Buscar selección
-          <input id="team-search" type="text" placeholder="Ej. México, Brasil, Argentina..." />
-        </label>
-
-        <div id="team-selector" class="team-grid scrollable-team-grid"></div>
-
-        <div class="step-card">
-          <span class="step-number">2</span>
-          <div>
-            <h3>Gira la ruleta</h3>
-            <p>Gana puntos y desbloquea recompensas.</p>
           </div>
         </div>
 
@@ -128,6 +141,32 @@
           <button id="return-whatsapp-btn" class="secondary-btn">
             Volver a WhatsApp
           </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="why-section" id="rewards">
+      <div class="why-visual">
+        <div class="large-shape">
+          <div class="large-shape-photo"></div>
+        </div>
+      </div>
+
+      <div class="why-copy">
+        <h2>Why play this challenge?</h2>
+        <p>
+          Esta demo muestra cómo una campaña de WhatsApp puede convertirse en una experiencia
+          interactiva para capturar preferencias, sumar puntos y crear segmentos accionables.
+        </p>
+
+        <div class="stat-block">
+          <strong>1 segmento</strong>
+          <span>creado por selección apoyada</span>
+        </div>
+
+        <div class="stat-block">
+          <strong>1 next action</strong>
+          <span>lista para disparar campaña personalizada</span>
         </div>
       </div>
     </section>
