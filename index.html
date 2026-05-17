@@ -9,56 +9,71 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
-<body class="game-body">
-  <main class="game-app">
-    <section class="game-card">
-      <div class="brand-row">
-        <img id="brand-logo" src="" alt="Logo de la marca" />
-        <a href="./admin.html" class="admin-link">Admin</a>
+<body>
+  <main class="game-shell">
+    <header class="mobile-header">
+      <div>
+        <p id="campaign-eyebrow" class="eyebrow">Mundial Fan Challenge</p>
+        <h1 id="campaign-title">Gira y gana puntos</h1>
       </div>
 
-      <div class="intro">
-        <p id="campaign-eyebrow" class="eyebrow">MATCHDAY GAME</p>
-        <h1 id="campaign-title">Gira la ruleta</h1>
-        <p id="campaign-subtitle">Elige tu selección y gana puntos.</p>
-      </div>
+      <img id="brand-logo" class="game-logo" src="" alt="Logo de la marca" />
+    </header>
 
-      <div class="team-block">
-        <label for="team-search">Selecciona tu país</label>
-        <input id="team-search" type="text" placeholder="Buscar país..." />
-        <div id="team-selector" class="team-selector"></div>
-      </div>
+    <section class="player-card">
+      <p class="section-kicker">Tu juego</p>
+      <h2 id="player-title">Preparando tu experiencia...</h2>
+      <p id="player-subtitle">
+        Esta jugada quedará asociada a tu participación.
+      </p>
+    </section>
 
-      <div class="score-row">
+    <section class="game-hero">
+      <div class="score-strip">
         <div>
-          <strong id="metric-team">—</strong>
-          <span>Equipo</span>
+          <span id="metric-team">—</span>
+          <small>Equipo</small>
         </div>
 
         <div>
-          <strong id="metric-score">0</strong>
-          <span>Puntos</span>
+          <span id="metric-score">0</span>
+          <small>Puntos</small>
         </div>
       </div>
 
-      <div class="wheel-card">
-        <div class="pointer"></div>
-        <div class="wheel-container"></div>
-      </div>
+      <section id="country-card" class="country-card">
+        <p class="section-kicker">Fallback</p>
+        <h2>Selecciona tu país</h2>
+        <p class="helper-text">
+          Esta sección solo aparece si el link no trae selección.
+        </p>
+        <div id="team-selector" class="team-grid"></div>
+      </section>
 
-      <button id="spin-btn" class="primary-btn" disabled>
-        Selecciona un país para girar
-      </button>
+      <section class="wheel-card">
+        <p class="section-kicker">Juega ahora</p>
+        <h2>Gira la ruleta</h2>
 
-      <div id="result-card" class="result-card hidden">
-        <p class="result-label">Resultado</p>
-        <h2 id="result-title"></h2>
-        <p id="result-description"></p>
+        <div class="wheel-area">
+          <div class="pointer"></div>
+          <div class="wheel-container"></div>
+        </div>
 
-        <button id="return-whatsapp-btn" class="secondary-btn">
-          Volver a WhatsApp
+        <button id="spin-btn" class="primary-btn" disabled>
+          Cargando juego...
         </button>
-      </div>
+      </section>
+
+      <section id="result-card" class="result-card hidden">
+        <p class="result-label">Resultado</p>
+        <h3 id="result-title"></h3>
+        <p id="result-description"></p>
+      </section>
+
+      <section class="event-card">
+        <p class="section-kicker">Custom event preview</p>
+        <pre id="event-preview">{}</pre>
+      </section>
     </section>
   </main>
 
