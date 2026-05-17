@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>Mundial Fan Challenge</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Mundial Fan Challenge</p>
+        <h1 id="campaign-title">Gira, suma puntos y desbloquea premios</h1>
+      </div>
+
+      <div class="brand-box">
+        <span class="brand-label">Demo by</span>
+        <img id="brand-logo" src="" alt="Logo de la marca" />
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="tag">⚽ Experiencia mundialista personalizada</p>
+        <h2>Elige tu selección, gira la ruleta y gana puntos para desbloquear recompensas.</h2>
+        <p>
+          Esta demo simula cómo una campaña de WhatsApp puede redirigir a un micrositio,
+          capturar eventos de comportamiento y generar segmentos dinámicos para futuras campañas.
+        </p>
+
+        <div class="brand-editor">
+          <h3>Branding de la demo</h3>
+
+          <label>
+            Nombre de marca
+            <input id="brand-name-input" type="text" placeholder="Ej. Banco Demo" />
+          </label>
+
+          <label>
+            URL del logo
+            <input id="brand-logo-input" type="text" placeholder="https://..." />
+          </label>
+
+          <label>
+            Color principal
+            <input id="brand-color-input" type="color" />
+          </label>
+
+          <button id="apply-brand-btn" class="secondary-btn">
+            Aplicar branding
+          </button>
+        </div>
+      </div>
+
+      <div class="game-card">
+        <div class="step-card">
+          <span class="step-number">1</span>
+          <div>
+            <h3>Elige tu selección</h3>
+            <p>Este evento crea el primer segmento del usuario.</p>
+          </div>
+        </div>
+
+        <div id="team-selector" class="team-grid"></div>
+
+        <div class="step-card">
+          <span class="step-number">2</span>
+          <div>
+            <h3>Gira la ruleta</h3>
+            <p>El resultado genera puntos, reward y siguiente acción.</p>
+          </div>
+        </div>
+
+        <div class="wheel-area">
+          <div class="pointer"></div>
+          <div class="wheel-container"></div>
+        </div>
+
+        <button id="spin-btn" class="primary-btn" disabled>
+          Selecciona un equipo para girar
+        </button>
+
+        <div id="result-card" class="result-card hidden">
+          <p class="result-label">Resultado</p>
+          <h3 id="result-title"></h3>
+          <p id="result-description"></p>
+          <button id="return-whatsapp-btn" class="secondary-btn">
+            Volver a WhatsApp
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="event-section">
+      <div>
+        <p class="eyebrow">Event payload</p>
+        <h2>Evento listo para custom integration</h2>
+        <p>
+          Este JSON es el payload que después podrás enviar a Gupshup, Apps Script,
+          Supabase o a una integración custom para segmentación y campañas.
+        </p>
+      </div>
+
+      <pre id="event-preview">{}</pre>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/spin-wheel@5.0.2/dist/spin-wheel-iife.js"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
