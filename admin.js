@@ -2,27 +2,23 @@ const STORAGE_KEY = "worldcup_demo_config";
 
 const fields = {
   logoPreview: document.getElementById("admin-logo-preview"),
-
   brandName: document.getElementById("brand-name"),
   brandLogo: document.getElementById("brand-logo"),
   brandPrimary: document.getElementById("brand-primary"),
   brandSecondary: document.getElementById("brand-secondary"),
   brandAccent: document.getElementById("brand-accent"),
   brandBg: document.getElementById("brand-bg"),
-
   campaignId: document.getElementById("campaign-id"),
   campaignName: document.getElementById("campaign-name"),
   campaignSource: document.getElementById("campaign-source"),
-
   returnPhone: document.getElementById("return-phone"),
   returnMessage: document.getElementById("return-message"),
-
   endpointEnabled: document.getElementById("endpoint-enabled"),
   endpointUrl: document.getElementById("endpoint-url"),
-
   payloadEditor: document.getElementById("payload-editor"),
   saveConfigBtn: document.getElementById("save-config-btn"),
   openGameBtn: document.getElementById("open-game-btn"),
+  resetConfigBtn: document.getElementById("reset-config-btn"),
   generatedUrl: document.getElementById("generated-url")
 };
 
@@ -30,93 +26,47 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function initAdmin() {
-  const config = loadSavedConfig();
-
-  hydrateForm(config);
-  updatePreview(config);
-  updateGeneratedUrl(config);
-
-  fields.saveConfigBtn.addEventListener("click", saveConfig);
-  fields.openGameBtn.addEventListener("click", openGame);
-
-  const editableFields = [
-    fields.brandName,
-    fields.brandLogo,
-    fields.brandPrimary,
-    fields.brandSecondary,
-    fields.brandAccent,
-    fields.brandBg,
-    fields.campaignId,
-    fields.campaignName,
-    fields.campaignSource,
-    fields.returnPhone,
-    fields.returnMessage,
-    fields.endpointEnabled,
-    fields.endpointUrl,
-    fields.payloadEditor
-  ];
-
-  editableFields.forEach((field) => {
-    field.addEventListener("input", handleLiveUpdate);
-    field.addEventListener("change", handleLiveUpdate);
-  });
-}
-
-function handleLiveUpdate() {
-  const liveConfig = getConfigFromForm({ silent: true });
-
-  if (!liveConfig) return;
-
-  updatePreview(liveConfig);
-  updateGeneratedUrl(liveConfig);
-}
-
-function loadSavedConfig() {
+function loadConfig() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
   if (!saved) return clone(DEMO_CONFIG);
 
   try {
-    return mergeConfig(clone(DEMO_CONFIG), JSON.parse(saved));
-  } catch (error) {
-    console.error("Invalid saved config", error);
+    const parsed = JSON.parse(saved);
+
+    return {
+      ...clone(DEMO_CONFIG),
+      ...parsed,
+      brand: { ...DEMO_CONFIG.brand, ...(parsed.brand || {}) },
+      campaign: { ...DEMO_CONFIG.campaign, ...(parsed.campaign || {}) },
+      whatsapp: { ...DEMO_CONFIG.whatsapp, ...(parsed.whatsapp || {}) },
+      eventEndpoint: { ...DEMO_CONFIG.eventEndpoint, ...(parsed.eventEndpoint || {}) },
+      payloadTemplate: { ...DEMO_CONFIG.payloadTemplate, ...(parsed.payloadTemplate || {}) }
+    };
+  } catch {
     return clone(DEMO_CONFIG);
   }
 }
 
-function mergeConfig(base, override) {
-  return {
-    ...base,
-    ...override,
-    brand: {
-      ...base.brand,
-      ...(override.brand || {})
-    },
-    campaign: {
-      ...base.campaign,
-      ...(override.campaign || {})
-    },
-    whatsapp: {
-      ...base.whatsapp,
-      ...(override.whatsapp || {})
-    },
-    eventEndpoint: {
-      ...base.eventEndpoint,
-      ...(override.eventEndpoint || {})
-    },
-    payloadTemplate: {
-      ...base.payloadTemplate,
-      ...(override.payloadTemplate || {}),
-      metadata: {
-        ...(base.payloadTemplate.metadata || {}),
-        ...((override.payloadTemplate || {}).metadata || {})
-      }
-    }
-  };
+function init() {
+  const config = loadConfig();
+
+  fillForm(config);
+  updatePreview(config);
+  updateUrl(config);
+
+  fields.saveConfigBtn.addEventListener("click", saveConfig);
+  fields.openGameBtn.addEventListener("click", openGame);
+  fields.resetConfigBtn.addEventListener("click", resetConfig);
+
+  Object.values(fields).forEach((field) => {
+    if (!field || field.tagName === "PRE" || field.tagName === "IMG") return;
+    field.addEventListener("input", liveUpdate);
+    field.addEventListener("change", liveUpdate);
+  });
 }
 
-function hydrateForm(config) {
+function fillForm(config) {
   fields.brandName.value = config.brand.name;
   fields.brandLogo.value = config.brand.logoUrl;
   fields.brandPrimary.value = config.brand.primaryColor;
@@ -137,115 +87,107 @@ function hydrateForm(config) {
   fields.payloadEditor.value = JSON.stringify(config.payloadTemplate, null, 2);
 }
 
-function getConfigFromForm(options = {}) {
-  let payloadTemplate;
+function getConfigFromForm(silent = false) {
+  let payload;
 
   try {
-    payloadTemplate = JSON.parse(fields.payloadEditor.value || "{}");
-  } catch (error) {
-    if (!options.silent) {
-      alert("El payload no es un JSON válido. Revísalo antes de guardar.");
-    }
+    payload = JSON.parse(fields.payloadEditor.value || "{}");
+  } catch {
+    if (!silent) alert("Payload no es JSON válido.");
     return null;
   }
 
   return {
     ...clone(DEMO_CONFIG),
-
     brand: {
-      name: fields.brandName.value.trim() || DEMO_CONFIG.brand.name,
+      name: fields.brandName.value.trim() || "Marca Demo",
       logoUrl: fields.brandLogo.value.trim() || DEMO_CONFIG.brand.logoUrl,
-      primaryColor: fields.brandPrimary.value || DEMO_CONFIG.brand.primaryColor,
-      secondaryColor: fields.brandSecondary.value || DEMO_CONFIG.brand.secondaryColor,
-      accentColor: fields.brandAccent.value || DEMO_CONFIG.brand.accentColor,
-      backgroundColor: fields.brandBg.value || DEMO_CONFIG.brand.backgroundColor
+      primaryColor: fields.brandPrimary.value,
+      secondaryColor: fields.brandSecondary.value,
+      accentColor: fields.brandAccent.value,
+      backgroundColor: fields.brandBg.value
     },
-
     campaign: {
-      ...DEMO_CONFIG.campaign,
-      campaignId: fields.campaignId.value.trim() || DEMO_CONFIG.campaign.campaignId,
-      campaignName: fields.campaignName.value.trim() || DEMO_CONFIG.campaign.campaignName,
-      source: fields.campaignSource.value.trim() || DEMO_CONFIG.campaign.source
+      campaignId: fields.campaignId.value.trim() || "worldcup_2026_demo",
+      campaignName: fields.campaignName.value.trim() || "Mundial Fan Challenge",
+      source: fields.campaignSource.value.trim() || "whatsapp"
     },
-
     whatsapp: {
-      returnPhone: fields.returnPhone.value.trim() || DEMO_CONFIG.whatsapp.returnPhone,
-      returnMessage: fields.returnMessage.value.trim() || DEMO_CONFIG.whatsapp.returnMessage
+      returnPhone: fields.returnPhone.value.trim() || "525500000000",
+      returnMessage: fields.returnMessage.value.trim() || "Quiero continuar con mi experiencia mundialista"
     },
-
     teams: clone(DEMO_CONFIG.teams),
-
     wheelItems: clone(DEMO_CONFIG.wheelItems),
-
     eventEndpoint: {
       enabled: fields.endpointEnabled.checked,
       url: fields.endpointUrl.value.trim()
     },
-
-    payloadTemplate
+    payloadTemplate: payload
   };
 }
 
 function updatePreview(config) {
   fields.logoPreview.src = config.brand.logoUrl;
-  fields.logoPreview.alt = `${config.brand.name} logo`;
 
+  document.documentElement.style.setProperty("--brand-bg", config.brand.backgroundColor);
   document.documentElement.style.setProperty("--brand-primary", config.brand.primaryColor);
   document.documentElement.style.setProperty("--brand-secondary", config.brand.secondaryColor);
   document.documentElement.style.setProperty("--brand-accent", config.brand.accentColor);
-  document.documentElement.style.setProperty("--brand-bg", config.brand.backgroundColor);
+}
+
+function liveUpdate() {
+  const config = getConfigFromForm(true);
+  if (!config) return;
+
+  updatePreview(config);
+  updateUrl(config);
 }
 
 function saveConfig() {
   const config = getConfigFromForm();
-
   if (!config) return;
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  updateGeneratedUrl(config);
+  updateUrl(config);
+  alert("Guardado.");
+}
 
-  alert("Configuración guardada.");
+function resetConfig() {
+  localStorage.removeItem(STORAGE_KEY);
+  fillForm(clone(DEMO_CONFIG));
+  updatePreview(clone(DEMO_CONFIG));
+  updateUrl(clone(DEMO_CONFIG));
+  alert("Reseteado.");
 }
 
 function encodeConfig(config) {
-  const json = JSON.stringify(config);
-  return btoa(unescape(encodeURIComponent(json)));
+  return btoa(unescape(encodeURIComponent(JSON.stringify(config))));
 }
 
-function getGameBaseUrl() {
-  const currentUrl = new URL(window.location.href);
-  const path = currentUrl.pathname.replace("admin.html", "index.html");
-  return `${currentUrl.origin}${path}`;
+function getGameUrl() {
+  const url = new URL(window.location.href);
+  return `${url.origin}${url.pathname.replace("admin.html", "index.html")}`;
 }
 
-function updateGeneratedUrl(config) {
+function updateUrl(config) {
   const encoded = encodeConfig(config);
-  const baseUrl = getGameBaseUrl();
 
-  const demoUrl =
-    `${baseUrl}?config=${encoded}` +
-    `&wa_id=525512345678` +
-    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
-
-  fields.generatedUrl.textContent = demoUrl;
+  fields.generatedUrl.textContent =
+    `${getGameUrl()}?config=${encoded}&wa_id=525512345678&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
 }
 
 function openGame() {
   const config = getConfigFromForm();
-
   if (!config) return;
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 
   const encoded = encodeConfig(config);
-  const baseUrl = getGameBaseUrl();
 
-  const demoUrl =
-    `${baseUrl}?config=${encoded}` +
-    `&wa_id=525512345678` +
-    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
-
-  window.open(demoUrl, "_blank");
+  window.open(
+    `${getGameUrl()}?config=${encoded}&wa_id=525512345678&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`,
+    "_blank"
+  );
 }
 
-initAdmin();
+init();
