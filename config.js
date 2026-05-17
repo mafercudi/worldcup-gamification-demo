@@ -15,7 +15,7 @@ const DEMO_CONFIG = {
   },
 
   event: {
-    eventName: "mundial"
+    eventName: "mundial_v4"
   },
 
   teams: [
