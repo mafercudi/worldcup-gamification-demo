@@ -14,6 +14,10 @@ const DEMO_CONFIG = {
     source: "whatsapp"
   },
 
+  event: {
+    eventName: "mundial"
+  },
+
   teams: [
     { id: "mexico", label: "México", flag: "🇲🇽" },
     { id: "brasil", label: "Brasil", flag: "🇧🇷" },
