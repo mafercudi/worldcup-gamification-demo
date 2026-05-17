@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Admin - Mundial Fan Challenge</title>
+  <title>Admin | Mundial Fan Challenge</title>
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -16,7 +16,7 @@
         <p class="eyebrow">Admin View</p>
         <h1>Configura tu demo mundialista</h1>
         <p>
-          Edita branding, campaña, payload y endpoint. Después genera una URL para abrir la vista del juego.
+          Edita branding, campaña, endpoint y payload. Después genera la URL para abrir la vista de juego.
         </p>
       </div>
 
@@ -27,7 +27,7 @@
     </header>
 
     <section class="admin-grid">
-      <div class="hero-copy">
+      <div class="panel">
         <p class="eyebrow">Branding</p>
         <h2>Marca de la demo</h2>
 
@@ -41,28 +41,30 @@
           <input id="brand-logo" type="text" />
         </label>
 
-        <label>
-          Color principal
-          <input id="brand-primary" type="color" />
-        </label>
+        <div class="form-grid">
+          <label>
+            Color principal
+            <input id="brand-primary" type="color" />
+          </label>
 
-        <label>
-          Color secundario
-          <input id="brand-secondary" type="color" />
-        </label>
+          <label>
+            Color secundario
+            <input id="brand-secondary" type="color" />
+          </label>
 
-        <label>
-          Color acento
-          <input id="brand-accent" type="color" />
-        </label>
+          <label>
+            Color acento
+            <input id="brand-accent" type="color" />
+          </label>
 
-        <label>
-          Color fondo
-          <input id="brand-bg" type="color" />
-        </label>
+          <label>
+            Color fondo
+            <input id="brand-bg" type="color" />
+          </label>
+        </div>
       </div>
 
-      <div class="hero-copy">
+      <div class="panel">
         <p class="eyebrow">Campaign</p>
         <h2>Datos de campaña</h2>
 
@@ -98,8 +100,8 @@
         <p class="eyebrow">Payload</p>
         <h2>Payload base para custom integration</h2>
         <p>
-          Edita este JSON para agregar campos que quieras enviar después a Gupshup,
-          Apps Script, Supabase o cualquier endpoint propio.
+          Este JSON se suma a cada evento generado por el juego.
+          Después lo puedes enviar a Gupshup, Apps Script, Supabase o cualquier endpoint propio.
         </p>
 
         <label class="checkbox-row">
@@ -129,7 +131,7 @@
         <p class="eyebrow">Demo URL</p>
         <h2>URL generada</h2>
         <p>
-          Esta URL abre la vista de juego con la configuración actual.
+          Esta URL abre el juego con la configuración actual. Puedes usarla como CTA de una plantilla de WhatsApp.
         </p>
       </div>
 
