@@ -9,71 +9,56 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
-<body>
-  <main class="app-shell">
-    <header class="mobile-header">
-      <div class="brand-area">
+<body class="game-body">
+  <main class="game-app">
+    <section class="game-card">
+      <div class="brand-row">
         <img id="brand-logo" src="" alt="Logo de la marca" />
+        <a href="./admin.html" class="admin-link">Admin</a>
       </div>
 
-      <a class="admin-link" href="./admin.html">Admin</a>
-    </header>
-
-    <section class="game-screen">
-      <div class="hero-copy">
-        <p class="eyebrow" id="campaign-eyebrow">Matchday Game</p>
-        <h1 id="campaign-title">Mundial Fan Challenge</h1>
-        <p id="campaign-subtitle">
-          Elige tu selección, gira la ruleta y gana puntos.
-        </p>
+      <div class="intro">
+        <p id="campaign-eyebrow" class="eyebrow">MATCHDAY GAME</p>
+        <h1 id="campaign-title">Gira la ruleta</h1>
+        <p id="campaign-subtitle">Elige tu selección y gana puntos.</p>
       </div>
 
-      <section class="team-section" id="teams">
-        <label class="team-search-label">
-          Selecciona el país que apoyas
-          <input id="team-search" type="text" placeholder="Buscar país..." />
-        </label>
-
+      <div class="team-block">
+        <label for="team-search">Selecciona tu país</label>
+        <input id="team-search" type="text" placeholder="Buscar país..." />
         <div id="team-selector" class="team-selector"></div>
-      </section>
+      </div>
 
-      <section class="wheel-section" id="game">
-        <div class="score-row">
-          <div>
-            <span id="metric-team">—</span>
-            <small>Equipo</small>
-          </div>
-
-          <div>
-            <span id="metric-score">0</span>
-            <small>Puntos</small>
-          </div>
-
-          <div>
-            <span id="metric-segment">—</span>
-            <small>Segmento</small>
-          </div>
+      <div class="score-row">
+        <div>
+          <strong id="metric-team">—</strong>
+          <span>Equipo</span>
         </div>
 
-        <div class="wheel-card">
-          <div class="pointer"></div>
-          <div class="wheel-container"></div>
+        <div>
+          <strong id="metric-score">0</strong>
+          <span>Puntos</span>
         </div>
+      </div>
 
-        <button id="spin-btn" class="primary-btn" disabled>
-          Selecciona un país para girar
+      <div class="wheel-card">
+        <div class="pointer"></div>
+        <div class="wheel-container"></div>
+      </div>
+
+      <button id="spin-btn" class="primary-btn" disabled>
+        Selecciona un país para girar
+      </button>
+
+      <div id="result-card" class="result-card hidden">
+        <p class="result-label">Resultado</p>
+        <h2 id="result-title"></h2>
+        <p id="result-description"></p>
+
+        <button id="return-whatsapp-btn" class="secondary-btn">
+          Volver a WhatsApp
         </button>
-
-        <div id="result-card" class="result-card hidden">
-          <p class="result-label">Resultado</p>
-          <h3 id="result-title"></h3>
-          <p id="result-description"></p>
-
-          <button id="return-whatsapp-btn" class="secondary-btn">
-            Volver a WhatsApp
-          </button>
-        </div>
-      </section>
+      </div>
     </section>
   </main>
 
