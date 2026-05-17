@@ -26,6 +26,10 @@ const fields = {
   generatedUrl: document.getElementById("generated-url")
 };
 
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 function initAdmin() {
   const config = loadSavedConfig();
 
@@ -36,32 +40,80 @@ function initAdmin() {
   fields.saveConfigBtn.addEventListener("click", saveConfig);
   fields.openGameBtn.addEventListener("click", openGame);
 
-  Object.values(fields).forEach((field) => {
-    if (field && (field.tagName === "INPUT" || field.tagName === "TEXTAREA")) {
-      field.addEventListener("input", () => {
-        const liveConfig = getConfigFromForm({ silent: true });
-        if (liveConfig) {
-          updatePreview(liveConfig);
-          updateGeneratedUrl(liveConfig);
-        }
-      });
-    }
+  const editableFields = [
+    fields.brandName,
+    fields.brandLogo,
+    fields.brandPrimary,
+    fields.brandSecondary,
+    fields.brandAccent,
+    fields.brandBg,
+    fields.campaignId,
+    fields.campaignName,
+    fields.campaignSource,
+    fields.returnPhone,
+    fields.returnMessage,
+    fields.endpointEnabled,
+    fields.endpointUrl,
+    fields.payloadEditor
+  ];
+
+  editableFields.forEach((field) => {
+    field.addEventListener("input", handleLiveUpdate);
+    field.addEventListener("change", handleLiveUpdate);
   });
+}
+
+function handleLiveUpdate() {
+  const liveConfig = getConfigFromForm({ silent: true });
+
+  if (!liveConfig) return;
+
+  updatePreview(liveConfig);
+  updateGeneratedUrl(liveConfig);
 }
 
 function loadSavedConfig() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
-  if (!saved) return structuredClone(DEMO_CONFIG);
+  if (!saved) return clone(DEMO_CONFIG);
 
   try {
-    return {
-      ...structuredClone(DEMO_CONFIG),
-      ...JSON.parse(saved)
-    };
-  } catch {
-    return structuredClone(DEMO_CONFIG);
+    return mergeConfig(clone(DEMO_CONFIG), JSON.parse(saved));
+  } catch (error) {
+    console.error("Invalid saved config", error);
+    return clone(DEMO_CONFIG);
   }
+}
+
+function mergeConfig(base, override) {
+  return {
+    ...base,
+    ...override,
+    brand: {
+      ...base.brand,
+      ...(override.brand || {})
+    },
+    campaign: {
+      ...base.campaign,
+      ...(override.campaign || {})
+    },
+    whatsapp: {
+      ...base.whatsapp,
+      ...(override.whatsapp || {})
+    },
+    eventEndpoint: {
+      ...base.eventEndpoint,
+      ...(override.eventEndpoint || {})
+    },
+    payloadTemplate: {
+      ...base.payloadTemplate,
+      ...(override.payloadTemplate || {}),
+      metadata: {
+        ...(base.payloadTemplate.metadata || {}),
+        ...((override.payloadTemplate || {}).metadata || {})
+      }
+    }
+  };
 }
 
 function hydrateForm(config) {
@@ -90,7 +142,7 @@ function getConfigFromForm(options = {}) {
 
   try {
     payloadTemplate = JSON.parse(fields.payloadEditor.value || "{}");
-  } catch {
+  } catch (error) {
     if (!options.silent) {
       alert("El payload no es un JSON válido. Revísalo antes de guardar.");
     }
@@ -98,32 +150,36 @@ function getConfigFromForm(options = {}) {
   }
 
   return {
-    ...structuredClone(DEMO_CONFIG),
+    ...clone(DEMO_CONFIG),
 
     brand: {
-      name: fields.brandName.value,
-      logoUrl: fields.brandLogo.value,
-      primaryColor: fields.brandPrimary.value,
-      secondaryColor: fields.brandSecondary.value,
-      accentColor: fields.brandAccent.value,
-      backgroundColor: fields.brandBg.value
+      name: fields.brandName.value.trim() || DEMO_CONFIG.brand.name,
+      logoUrl: fields.brandLogo.value.trim() || DEMO_CONFIG.brand.logoUrl,
+      primaryColor: fields.brandPrimary.value || DEMO_CONFIG.brand.primaryColor,
+      secondaryColor: fields.brandSecondary.value || DEMO_CONFIG.brand.secondaryColor,
+      accentColor: fields.brandAccent.value || DEMO_CONFIG.brand.accentColor,
+      backgroundColor: fields.brandBg.value || DEMO_CONFIG.brand.backgroundColor
     },
 
     campaign: {
       ...DEMO_CONFIG.campaign,
-      campaignId: fields.campaignId.value,
-      campaignName: fields.campaignName.value,
-      source: fields.campaignSource.value
+      campaignId: fields.campaignId.value.trim() || DEMO_CONFIG.campaign.campaignId,
+      campaignName: fields.campaignName.value.trim() || DEMO_CONFIG.campaign.campaignName,
+      source: fields.campaignSource.value.trim() || DEMO_CONFIG.campaign.source
     },
 
     whatsapp: {
-      returnPhone: fields.returnPhone.value,
-      returnMessage: fields.returnMessage.value
+      returnPhone: fields.returnPhone.value.trim() || DEMO_CONFIG.whatsapp.returnPhone,
+      returnMessage: fields.returnMessage.value.trim() || DEMO_CONFIG.whatsapp.returnMessage
     },
+
+    teams: clone(DEMO_CONFIG.teams),
+
+    wheelItems: clone(DEMO_CONFIG.wheelItems),
 
     eventEndpoint: {
       enabled: fields.endpointEnabled.checked,
-      url: fields.endpointUrl.value
+      url: fields.endpointUrl.value.trim()
     },
 
     payloadTemplate
@@ -156,11 +212,20 @@ function encodeConfig(config) {
   return btoa(unescape(encodeURIComponent(json)));
 }
 
+function getGameBaseUrl() {
+  const currentUrl = new URL(window.location.href);
+  const path = currentUrl.pathname.replace("admin.html", "index.html");
+  return `${currentUrl.origin}${path}`;
+}
+
 function updateGeneratedUrl(config) {
   const encoded = encodeConfig(config);
-  const baseUrl = window.location.href.replace("admin.html", "index.html").split("?")[0];
+  const baseUrl = getGameBaseUrl();
 
-  const demoUrl = `${baseUrl}?config=${encoded}&wa_id=525512345678&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
+  const demoUrl =
+    `${baseUrl}?config=${encoded}` +
+    `&wa_id=525512345678` +
+    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
 
   fields.generatedUrl.textContent = demoUrl;
 }
@@ -173,9 +238,12 @@ function openGame() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 
   const encoded = encodeConfig(config);
-  const baseUrl = window.location.href.replace("admin.html", "index.html").split("?")[0];
+  const baseUrl = getGameBaseUrl();
 
-  const demoUrl = `${baseUrl}?config=${encoded}&wa_id=525512345678&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
+  const demoUrl =
+    `${baseUrl}?config=${encoded}` +
+    `&wa_id=525512345678` +
+    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
 
   window.open(demoUrl, "_blank");
 }
