@@ -35,19 +35,29 @@ function getRuntimeConfig() {
 function mergeConfig(base, override) {
   return {
     ...base,
-    ...override,
+
     brand: {
       ...base.brand,
       ...(override.brand || {})
     },
+
     campaign: {
       ...base.campaign,
       ...(override.campaign || {})
     },
+
     eventEndpoint: {
       ...base.eventEndpoint,
       ...(override.eventEndpoint || {})
-    }
+    },
+
+    /*
+      Importante:
+      No tomamos wheelItems desde localStorage para evitar premios viejos
+      como 75 puntos o labels anteriores guardados en el navegador.
+    */
+    teams: clone(base.teams),
+    wheelItems: clone(base.wheelItems)
   };
 }
 
@@ -64,7 +74,9 @@ const state = {
   selectedTeamLabel: "",
   scoreTotal: 0,
   wheel: null,
-  isSpinning: false
+  isSpinning: false,
+  pendingRewardIndex: null,
+  hasPlayed: false
 };
 
 const elements = {
@@ -116,14 +128,25 @@ function applyBrand(brand) {
 function hydrateTeamFromUrl() {
   if (!state.selectedTeam) return;
 
-  const team = APP_CONFIG.teams.find((item) => item.id === state.selectedTeam);
+  const normalizedTeam = normalizeTeamId(state.selectedTeam);
+  const team = APP_CONFIG.teams.find((item) => item.id === normalizedTeam);
 
   if (team) {
     state.selectedTeam = team.id;
     state.selectedTeamLabel = team.label;
   } else {
-    state.selectedTeamLabel = state.selectedTeam;
+    state.selectedTeam = normalizedTeam;
+    state.selectedTeamLabel = normalizedTeam;
   }
+}
+
+function normalizeTeamId(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_");
 }
 
 function configureGameMode() {
@@ -173,6 +196,8 @@ function renderTeams() {
 }
 
 function selectTeam(team, button) {
+  if (state.hasPlayed) return;
+
   state.selectedTeam = team.id;
   state.selectedTeamLabel = team.label;
 
@@ -221,7 +246,14 @@ function createWheel() {
     radius: 0.92,
 
     isInteractive: false,
-    pointerAngle: 270,
+
+    /*
+      Corrección clave:
+      Antes estaba en 270 y la librería estaba resolviendo el resultado
+      como si el indicador estuviera en otra posición.
+      Con 0, el spinToItem alinea el premio visual con el puntero superior.
+    */
+    pointerAngle: 0,
 
     onSpin: () => {
       state.isSpinning = true;
@@ -229,9 +261,14 @@ function createWheel() {
       elements.spinBtn.textContent = "Girando...";
     },
 
-    onRest: (event) => {
-      const rewardIndex = event.currentIndex;
-      handleWheelResult(rewardIndex);
+    onRest: () => {
+      /*
+        Corrección clave:
+        No usamos event.currentIndex porque estaba leyendo otro punto
+        de referencia de la rueda. Usamos el índice que nosotros elegimos
+        antes de girar.
+      */
+      handleWheelResult(state.pendingRewardIndex);
     }
   };
 
@@ -239,9 +276,12 @@ function createWheel() {
 }
 
 function spinWheelControlled() {
-  if (!state.selectedTeam || state.isSpinning) return;
+  if (!state.selectedTeam || state.isSpinning || state.hasPlayed) return;
 
   const winningItemIndex = getRandomWinningIndex();
+
+  state.pendingRewardIndex = winningItemIndex;
+
   const duration = 3800;
   const spinToCenter = true;
   const numberOfRevolutions = 5;
@@ -261,9 +301,12 @@ function getRandomWinningIndex() {
 }
 
 function handleWheelResult(rewardIndex) {
+  if (rewardIndex === null || rewardIndex === undefined) return;
+
   const reward = APP_CONFIG.wheelItems[rewardIndex];
 
   state.isSpinning = false;
+  state.hasPlayed = true;
   state.scoreTotal += reward.points;
 
   const payload = buildCustomEventPayload(reward.points);
@@ -273,8 +316,8 @@ function handleWheelResult(rewardIndex) {
   elements.resultDescription.textContent =
     `${state.selectedTeamLabel} suma ${reward.points} puntos. Vuelve mañana para una nueva jugada.`;
 
-  elements.spinBtn.disabled = false;
-  elements.spinBtn.textContent = "Jugar otra vez";
+  elements.spinBtn.disabled = true;
+  elements.spinBtn.textContent = "Vuelve mañana para jugar de nuevo";
 
   updateMetrics();
   emitPayload(payload);
