@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Admin - Mundial Fan Challenge</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Admin View</p>
+        <h1>Configura tu demo mundialista</h1>
+        <p>
+          Edita branding, campaña, payload y endpoint. Después genera una URL para abrir la vista del juego.
+        </p>
+      </div>
+
+      <div class="brand-box">
+        <span class="brand-label">Preview logo</span>
+        <img id="admin-logo-preview" src="" alt="Logo preview" />
+      </div>
+    </header>
+
+    <section class="admin-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Branding</p>
+        <h2>Marca de la demo</h2>
+
+        <label>
+          Nombre de marca
+          <input id="brand-name" type="text" />
+        </label>
+
+        <label>
+          URL del logo
+          <input id="brand-logo" type="text" />
+        </label>
+
+        <label>
+          Color principal
+          <input id="brand-primary" type="color" />
+        </label>
+
+        <label>
+          Color secundario
+          <input id="brand-secondary" type="color" />
+        </label>
+
+        <label>
+          Color acento
+          <input id="brand-accent" type="color" />
+        </label>
+
+        <label>
+          Color fondo
+          <input id="brand-bg" type="color" />
+        </label>
+      </div>
+
+      <div class="hero-copy">
+        <p class="eyebrow">Campaign</p>
+        <h2>Datos de campaña</h2>
+
+        <label>
+          Campaign ID
+          <input id="campaign-id" type="text" />
+        </label>
+
+        <label>
+          Campaign Name
+          <input id="campaign-name" type="text" />
+        </label>
+
+        <label>
+          Source
+          <input id="campaign-source" type="text" />
+        </label>
+
+        <label>
+          WhatsApp return phone
+          <input id="return-phone" type="text" />
+        </label>
+
+        <label>
+          WhatsApp return message
+          <input id="return-message" type="text" />
+        </label>
+      </div>
+    </section>
+
+    <section class="event-section">
+      <div>
+        <p class="eyebrow">Payload</p>
+        <h2>Payload base para custom integration</h2>
+        <p>
+          Edita este JSON para agregar campos que quieras enviar después a Gupshup,
+          Apps Script, Supabase o cualquier endpoint propio.
+        </p>
+
+        <label class="checkbox-row">
+          <input id="endpoint-enabled" type="checkbox" />
+          Activar envío a endpoint
+        </label>
+
+        <label>
+          Endpoint URL
+          <input id="endpoint-url" type="text" placeholder="https://..." />
+        </label>
+
+        <button id="save-config-btn" class="primary-btn">
+          Guardar configuración
+        </button>
+
+        <button id="open-game-btn" class="secondary-btn">
+          Abrir vista de juego
+        </button>
+      </div>
+
+      <textarea id="payload-editor" class="json-editor"></textarea>
+    </section>
+
+    <section class="event-section">
+      <div>
+        <p class="eyebrow">Demo URL</p>
+        <h2>URL generada</h2>
+        <p>
+          Esta URL abre la vista de juego con la configuración actual.
+        </p>
+      </div>
+
+      <pre id="generated-url"></pre>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>
