@@ -11,7 +11,7 @@ const DEMO_CONFIG = {
   campaign: {
     campaignId: "worldcup_2026_demo",
     campaignName: "Mundial Fan Challenge",
-    source: "whatsapp"
+    source: "worldcup_game"
   },
 
   event: {
@@ -38,6 +38,7 @@ const DEMO_CONFIG = {
 
   eventEndpoint: {
     enabled: false,
-    url: ""
+    url: "",
+    authToken: ""
   }
 };
