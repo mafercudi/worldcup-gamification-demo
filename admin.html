@@ -9,15 +9,20 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
-<body class="admin-body">
-  <main class="admin-app">
-    <section class="admin-card">
-      <h1>Admin demo</h1>
-      <p>Edita marca, colores, campaña y payload mínimo.</p>
-
-      <div class="admin-preview">
-        <img id="admin-logo-preview" src="" alt="Logo preview" />
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Admin View</p>
+        <h1>Configura tu demo</h1>
+        <p>Edita marca, colores, evento y credenciales de la custom integration.</p>
       </div>
+
+      <img id="admin-logo-preview" class="admin-logo" src="" alt="Logo preview" />
+    </header>
+
+    <section class="admin-card">
+      <p class="eyebrow">Branding</p>
 
       <label>
         Nombre de marca
@@ -29,12 +34,7 @@
         <input id="brand-logo" type="text" />
       </label>
 
-      <div class="color-grid">
-        <label>
-          Fondo
-          <input id="brand-bg" type="color" />
-        </label>
-
+      <div class="admin-color-grid">
         <label>
           Principal
           <input id="brand-primary" type="color" />
@@ -49,7 +49,16 @@
           Acento
           <input id="brand-accent" type="color" />
         </label>
+
+        <label>
+          Fondo
+          <input id="brand-bg" type="color" />
+        </label>
       </div>
+    </section>
+
+    <section class="admin-card">
+      <p class="eyebrow">Campaign</p>
 
       <label>
         Campaign ID
@@ -65,31 +74,34 @@
         Source
         <input id="campaign-source" type="text" />
       </label>
+    </section>
+
+    <section class="admin-card">
+      <p class="eyebrow">Custom Integration</p>
 
       <label>
-        WhatsApp return phone
-        <input id="return-phone" type="text" />
+        Event Name
+        <input id="event-name" type="text" />
       </label>
 
-      <label>
-        WhatsApp return message
-        <input id="return-message" type="text" />
-      </label>
-
-      <label class="checkbox-label">
+      <label class="checkbox-row">
         <input id="endpoint-enabled" type="checkbox" />
-        Activar endpoint
+        Activar envío a endpoint
       </label>
 
       <label>
-        Endpoint URL
-        <input id="endpoint-url" type="text" placeholder="https://..." />
+        Callback URL
+        <input id="endpoint-url" type="text" placeholder="https://notifications.gupshup.io/notifications/callback/service/ipaas/project/..." />
       </label>
 
       <label>
-        Payload base
-        <textarea id="payload-editor"></textarea>
+        Authorization Token
+        <input id="endpoint-token" type="text" placeholder="a4e05ad2-34a1-44f5-aa80-..." />
       </label>
+
+      <p class="helper-text">
+        El payload seguirá el patrón: event_name, event_time, customer_id, source y user.
+      </p>
 
       <button id="save-config-btn" class="primary-btn">
         Guardar configuración
@@ -98,13 +110,26 @@
       <button id="open-game-btn" class="secondary-btn">
         Abrir juego
       </button>
+    </section>
 
-      <button id="reset-config-btn" class="danger-btn">
-        Resetear
-      </button>
-
-      <h2>URL generada</h2>
+    <section class="admin-card">
+      <p class="eyebrow">Demo URL</p>
       <pre id="generated-url"></pre>
+    </section>
+
+    <section class="admin-card">
+      <p class="eyebrow">Payload esperado</p>
+      <pre>{
+  "event_name": "mundial",
+  "event_time": "2026-05-17T16:30:00.000Z",
+  "customer_id": "525512345678",
+  "source": "worldcup_game",
+  "user": {
+    "team_selected": "mexico",
+    "points_awarded": 150,
+    "campaign_id": "worldcup_2026_demo"
+  }
+}</pre>
     </section>
   </main>
 
