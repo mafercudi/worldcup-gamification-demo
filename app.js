@@ -1,3 +1,69 @@
+const STORAGE_KEY = "worldcup_demo_config";
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function getRuntimeConfig() {
+  const qs = new URLSearchParams(window.location.search);
+  const encodedConfig = qs.get("config");
+
+  if (encodedConfig) {
+    try {
+      const json = decodeURIComponent(escape(atob(encodedConfig)));
+      const parsedConfig = JSON.parse(json);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedConfig));
+      return mergeConfig(clone(DEMO_CONFIG), parsedConfig);
+    } catch (error) {
+      console.error("Invalid config param", error);
+    }
+  }
+
+  const savedConfig = localStorage.getItem(STORAGE_KEY);
+
+  if (savedConfig) {
+    try {
+      return mergeConfig(clone(DEMO_CONFIG), JSON.parse(savedConfig));
+    } catch (error) {
+      console.error("Invalid saved config", error);
+    }
+  }
+
+  return clone(DEMO_CONFIG);
+}
+
+function mergeConfig(base, override) {
+  return {
+    ...base,
+    ...override,
+    brand: {
+      ...base.brand,
+      ...(override.brand || {})
+    },
+    campaign: {
+      ...base.campaign,
+      ...(override.campaign || {})
+    },
+    whatsapp: {
+      ...base.whatsapp,
+      ...(override.whatsapp || {})
+    },
+    eventEndpoint: {
+      ...base.eventEndpoint,
+      ...(override.eventEndpoint || {})
+    },
+    payloadTemplate: {
+      ...base.payloadTemplate,
+      ...(override.payloadTemplate || {}),
+      metadata: {
+        ...(base.payloadTemplate.metadata || {}),
+        ...((override.payloadTemplate || {}).metadata || {})
+      }
+    }
+  };
+}
+
+const APP_CONFIG = getRuntimeConfig();
 
 const { Wheel } = spinWheel;
 
@@ -8,6 +74,7 @@ const state = {
   selectedTeamLabel: null,
   scoreTotal: 0,
   lastReward: null,
+  lastSegment: null,
   lastEvent: null,
   wheel: null,
   isSpinning: false
@@ -16,33 +83,38 @@ const state = {
 const qs = new URLSearchParams(window.location.search);
 
 state.waId = qs.get("wa_id") || "demo_user";
-state.campaignId = qs.get("campaign_id") || DEMO_CONFIG.campaign.campaignId;
+state.campaignId = qs.get("campaign_id") || APP_CONFIG.campaign.campaignId;
 
 const elements = {
   brandLogo: document.getElementById("brand-logo"),
+  campaignEyebrow: document.getElementById("campaign-eyebrow"),
   campaignTitle: document.getElementById("campaign-title"),
-  brandNameInput: document.getElementById("brand-name-input"),
-  brandLogoInput: document.getElementById("brand-logo-input"),
-  brandColorInput: document.getElementById("brand-color-input"),
-  applyBrandBtn: document.getElementById("apply-brand-btn"),
+  campaignSubtitle: document.getElementById("campaign-subtitle"),
+
   teamSelector: document.getElementById("team-selector"),
   spinBtn: document.getElementById("spin-btn"),
+
   resultCard: document.getElementById("result-card"),
   resultTitle: document.getElementById("result-title"),
   resultDescription: document.getElementById("result-description"),
+
   eventPreview: document.getElementById("event-preview"),
-  returnWhatsappBtn: document.getElementById("return-whatsapp-btn")
+  returnWhatsappBtn: document.getElementById("return-whatsapp-btn"),
+
+  metricTeam: document.getElementById("metric-team"),
+  metricScore: document.getElementById("metric-score"),
+  metricSegment: document.getElementById("metric-segment")
 };
 
 function init() {
-  applyBrand(DEMO_CONFIG.brand);
-  renderBrandEditorDefaults();
+  applyBrand(APP_CONFIG.brand);
   renderTeams();
   createWheel();
   bindEvents();
 
   emitEvent("page_loaded", {
-    event_label: "Microsite loaded"
+    event_label: "Microsite loaded",
+    next_action: "select_team"
   });
 }
 
@@ -54,19 +126,17 @@ function applyBrand(brand) {
 
   elements.brandLogo.src = brand.logoUrl;
   elements.brandLogo.alt = `${brand.name} logo`;
-  elements.campaignTitle.textContent = `${brand.name}: gira, suma puntos y desbloquea premios`;
-}
 
-function renderBrandEditorDefaults() {
-  elements.brandNameInput.value = DEMO_CONFIG.brand.name;
-  elements.brandLogoInput.value = DEMO_CONFIG.brand.logoUrl;
-  elements.brandColorInput.value = DEMO_CONFIG.brand.primaryColor;
+  elements.campaignEyebrow.textContent = APP_CONFIG.campaign.campaignName;
+  elements.campaignTitle.textContent = `${brand.name}: gira, suma puntos y desbloquea premios`;
+  elements.campaignSubtitle.textContent =
+    "Vive una experiencia mundialista personalizada, acumula puntos y desbloquea recompensas para tu selección.";
 }
 
 function renderTeams() {
   elements.teamSelector.innerHTML = "";
 
-  DEMO_CONFIG.teams.forEach((team) => {
+  APP_CONFIG.teams.forEach((team) => {
     const button = document.createElement("button");
     button.className = "team-btn";
     button.dataset.teamId = team.id;
@@ -82,6 +152,7 @@ function renderTeams() {
 function selectTeam(team, button) {
   state.selectedTeam = team.id;
   state.selectedTeamLabel = team.label;
+  state.lastSegment = `fan_${team.id}`;
 
   document.querySelectorAll(".team-btn").forEach((btn) => {
     btn.classList.remove("active");
@@ -92,10 +163,12 @@ function selectTeam(team, button) {
   elements.spinBtn.disabled = false;
   elements.spinBtn.textContent = "Girar ruleta";
 
+  updateMetrics();
+
   emitEvent("team_selected", {
     team_selected: team.id,
     team_label: team.label,
-    segment: `fan_${team.id}`,
+    segment: state.lastSegment,
     next_action: "show_spin_wheel"
   });
 }
@@ -104,33 +177,39 @@ function createWheel() {
   const container = document.querySelector(".wheel-container");
 
   const props = {
-    items: DEMO_CONFIG.wheelItems.map((item) => ({
+    items: APP_CONFIG.wheelItems.map((item) => ({
       label: item.label
     })),
+
     itemBackgroundColors: [
-      DEMO_CONFIG.brand.primaryColor,
-      DEMO_CONFIG.brand.secondaryColor,
-      DEMO_CONFIG.brand.accentColor,
+      APP_CONFIG.brand.primaryColor,
+      APP_CONFIG.brand.secondaryColor,
+      APP_CONFIG.brand.accentColor,
       "#ffffff"
     ],
+
     itemLabelColors: ["#ffffff", "#111111"],
-    itemLabelFont: "Inter, Arial, sans-serif",
+    itemLabelFont: "Arial, sans-serif",
     itemLabelFontSizeMax: 26,
     itemLabelRadius: 0.82,
     itemLabelRadiusMax: 0.32,
     itemLabelRotation: 0,
+
     lineColor: "rgba(255,255,255,0.65)",
     lineWidth: 2,
     borderColor: "rgba(255,255,255,0.85)",
     borderWidth: 3,
     radius: 0.92,
+
     isInteractive: false,
     pointerAngle: 270,
+
     onSpin: () => {
       state.isSpinning = true;
       elements.spinBtn.disabled = true;
       elements.spinBtn.textContent = "Girando...";
     },
+
     onRest: (event) => {
       const rewardIndex = event.currentIndex;
       handleWheelResult(rewardIndex);
@@ -159,17 +238,18 @@ function spinWheelControlled() {
 }
 
 function getRandomWinningIndex() {
-  return Math.floor(Math.random() * DEMO_CONFIG.wheelItems.length);
+  return Math.floor(Math.random() * APP_CONFIG.wheelItems.length);
 }
 
 function handleWheelResult(rewardIndex) {
-  const reward = DEMO_CONFIG.wheelItems[rewardIndex];
+  const reward = APP_CONFIG.wheelItems[rewardIndex];
 
   state.isSpinning = false;
   state.lastReward = reward;
   state.scoreTotal += reward.points;
 
   const segment = calculateSegment(reward);
+  state.lastSegment = segment;
 
   elements.resultCard.classList.remove("hidden");
   elements.resultTitle.textContent = `Ganaste ${reward.label}`;
@@ -178,6 +258,8 @@ function handleWheelResult(rewardIndex) {
 
   elements.spinBtn.disabled = false;
   elements.spinBtn.textContent = "Girar otra vez";
+
+  updateMetrics();
 
   emitEvent("spin_completed", {
     team_selected: state.selectedTeam,
@@ -223,6 +305,12 @@ function getNextAction(reward, segment) {
   return "send_continue_playing_template";
 }
 
+function updateMetrics() {
+  elements.metricTeam.textContent = state.selectedTeamLabel || "—";
+  elements.metricScore.textContent = String(state.scoreTotal);
+  elements.metricSegment.textContent = state.lastSegment || "—";
+}
+
 function emitEvent(eventType, payload = {}) {
   const event = {
     event_id: crypto.randomUUID(),
@@ -230,10 +318,23 @@ function emitEvent(eventType, payload = {}) {
     channel: "whatsapp",
     wa_id: state.waId,
     campaign_id: state.campaignId,
-    source: DEMO_CONFIG.campaign.source,
-    brand_name: DEMO_CONFIG.brand.name,
+    source: APP_CONFIG.campaign.source,
+    brand_name: APP_CONFIG.brand.name,
     microsite_url: window.location.href,
     timestamp: new Date().toISOString(),
+
+    custom_integration_payload: {
+      ...APP_CONFIG.payloadTemplate,
+      event_type: eventType,
+      wa_id: state.waId,
+      campaign_id: state.campaignId,
+      brand_name: APP_CONFIG.brand.name,
+      team_selected: state.selectedTeam,
+      score_total: state.scoreTotal,
+      segment: state.lastSegment,
+      last_reward: state.lastReward ? state.lastReward.label : null
+    },
+
     payload
   };
 
@@ -242,7 +343,7 @@ function emitEvent(eventType, payload = {}) {
 
   console.log("WORLD_CUP_DEMO_EVENT", event);
 
-  if (DEMO_CONFIG.eventEndpoint.enabled && DEMO_CONFIG.eventEndpoint.url) {
+  if (APP_CONFIG.eventEndpoint.enabled && APP_CONFIG.eventEndpoint.url) {
     sendEventToEndpoint(event);
   }
 
@@ -251,7 +352,7 @@ function emitEvent(eventType, payload = {}) {
 
 async function sendEventToEndpoint(event) {
   try {
-    await fetch(DEMO_CONFIG.eventEndpoint.url, {
+    await fetch(APP_CONFIG.eventEndpoint.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -264,16 +365,20 @@ async function sendEventToEndpoint(event) {
 }
 
 function returnToWhatsApp() {
+  const segment = state.lastEvent?.payload?.segment || state.lastSegment || "demo_segment";
+
   const message = encodeURIComponent(
-    `${DEMO_CONFIG.whatsapp.returnMessage}. Mi segmento es: ${state.lastEvent?.payload?.segment || "demo_segment"}`
+    `${APP_CONFIG.whatsapp.returnMessage}. Mi segmento es: ${segment}`
   );
 
-  const url = `https://wa.me/${DEMO_CONFIG.whatsapp.returnPhone}?text=${message}`;
+  const url = `https://wa.me/${APP_CONFIG.whatsapp.returnPhone}?text=${message}`;
 
   emitEvent("return_to_whatsapp_clicked", {
     score_total: state.scoreTotal,
     team_selected: state.selectedTeam,
+    team_label: state.selectedTeamLabel,
     last_reward: state.lastReward?.label || null,
+    segment,
     next_action: "continue_conversation_in_whatsapp"
   });
 
@@ -282,25 +387,6 @@ function returnToWhatsApp() {
 
 function bindEvents() {
   elements.spinBtn.addEventListener("click", spinWheelControlled);
-
-  elements.applyBrandBtn.addEventListener("click", () => {
-    const updatedBrand = {
-      ...DEMO_CONFIG.brand,
-      name: elements.brandNameInput.value || DEMO_CONFIG.brand.name,
-      logoUrl: elements.brandLogoInput.value || DEMO_CONFIG.brand.logoUrl,
-      primaryColor: elements.brandColorInput.value || DEMO_CONFIG.brand.primaryColor
-    };
-
-    DEMO_CONFIG.brand = updatedBrand;
-    applyBrand(updatedBrand);
-
-    emitEvent("brand_updated", {
-      brand_name: updatedBrand.name,
-      logo_url: updatedBrand.logoUrl,
-      primary_color: updatedBrand.primaryColor
-    });
-  });
-
   elements.returnWhatsappBtn.addEventListener("click", returnToWhatsApp);
 }
 
