@@ -1,201 +1,123 @@
-const STORAGE_KEY = "worldcup_demo_config";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-const fields = {
-  logoPreview: document.getElementById("admin-logo-preview"),
+  <title>Admin | Mundial Fan Challenge</title>
 
-  brandName: document.getElementById("brand-name"),
-  brandLogo: document.getElementById("brand-logo"),
-  brandPrimary: document.getElementById("brand-primary"),
-  brandSecondary: document.getElementById("brand-secondary"),
-  brandAccent: document.getElementById("brand-accent"),
-  brandBg: document.getElementById("brand-bg"),
+  <link rel="stylesheet" href="./styles.css" />
+</head>
 
-  campaignId: document.getElementById("campaign-id"),
-  campaignName: document.getElementById("campaign-name"),
-  campaignSource: document.getElementById("campaign-source"),
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Admin View</p>
+        <h1>Configura tu demo</h1>
+        <p>Edita marca, colores y endpoint para generar la vista del juego.</p>
+      </div>
 
-  endpointEnabled: document.getElementById("endpoint-enabled"),
-  endpointUrl: document.getElementById("endpoint-url"),
+      <img id="admin-logo-preview" class="admin-logo" src="" alt="Logo preview" />
+    </header>
 
-  saveConfigBtn: document.getElementById("save-config-btn"),
-  openGameBtn: document.getElementById("open-game-btn"),
-  generatedUrl: document.getElementById("generated-url")
-};
+    <section class="admin-card">
+      <p class="eyebrow">Branding</p>
 
-function clone(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
+      <label>
+        Nombre de marca
+        <input id="brand-name" type="text" />
+      </label>
 
-function initAdmin() {
-  const config = loadSavedConfig();
+      <label>
+        URL del logo
+        <input id="brand-logo" type="text" />
+      </label>
 
-  hydrateForm(config);
-  updatePreview(config);
-  updateGeneratedUrl(config);
+      <div class="admin-color-grid">
+        <label>
+          Principal
+          <input id="brand-primary" type="color" />
+        </label>
 
-  fields.saveConfigBtn.addEventListener("click", saveConfig);
-  fields.openGameBtn.addEventListener("click", openGame);
+        <label>
+          Secundario
+          <input id="brand-secondary" type="color" />
+        </label>
 
-  [
-    fields.brandName,
-    fields.brandLogo,
-    fields.brandPrimary,
-    fields.brandSecondary,
-    fields.brandAccent,
-    fields.brandBg,
-    fields.campaignId,
-    fields.campaignName,
-    fields.campaignSource,
-    fields.endpointEnabled,
-    fields.endpointUrl
-  ].forEach((field) => {
-    field.addEventListener("input", handleLiveUpdate);
-    field.addEventListener("change", handleLiveUpdate);
-  });
-}
+        <label>
+          Acento
+          <input id="brand-accent" type="color" />
+        </label>
 
-function handleLiveUpdate() {
-  const liveConfig = getConfigFromForm();
-  updatePreview(liveConfig);
-  updateGeneratedUrl(liveConfig);
-}
+        <label>
+          Fondo
+          <input id="brand-bg" type="color" />
+        </label>
+      </div>
+    </section>
 
-function loadSavedConfig() {
-  const saved = localStorage.getItem(STORAGE_KEY);
+    <section class="admin-card">
+      <p class="eyebrow">Campaign</p>
 
-  if (!saved) return clone(DEMO_CONFIG);
+      <label>
+        Campaign ID
+        <input id="campaign-id" type="text" />
+      </label>
 
-  try {
-    return mergeConfig(clone(DEMO_CONFIG), JSON.parse(saved));
-  } catch (error) {
-    console.error("Invalid saved config", error);
-    return clone(DEMO_CONFIG);
-  }
-}
+      <label>
+        Campaign Name
+        <input id="campaign-name" type="text" />
+      </label>
 
-function mergeConfig(base, override) {
-  return {
-    ...base,
-    ...override,
-    brand: {
-      ...base.brand,
-      ...(override.brand || {})
-    },
-    campaign: {
-      ...base.campaign,
-      ...(override.campaign || {})
-    },
-    eventEndpoint: {
-      ...base.eventEndpoint,
-      ...(override.eventEndpoint || {})
-    }
-  };
-}
+      <label>
+        Source
+        <input id="campaign-source" type="text" />
+      </label>
+    </section>
 
-function hydrateForm(config) {
-  fields.brandName.value = config.brand.name;
-  fields.brandLogo.value = config.brand.logoUrl;
-  fields.brandPrimary.value = config.brand.primaryColor;
-  fields.brandSecondary.value = config.brand.secondaryColor;
-  fields.brandAccent.value = config.brand.accentColor;
-  fields.brandBg.value = config.brand.backgroundColor;
+    <section class="admin-card">
+      <p class="eyebrow">Custom Integration</p>
 
-  fields.campaignId.value = config.campaign.campaignId;
-  fields.campaignName.value = config.campaign.campaignName;
-  fields.campaignSource.value = config.campaign.source;
+      <label class="checkbox-row">
+        <input id="endpoint-enabled" type="checkbox" />
+        Activar envío a endpoint
+      </label>
 
-  fields.endpointEnabled.checked = config.eventEndpoint.enabled;
-  fields.endpointUrl.value = config.eventEndpoint.url;
-}
+      <label>
+        Endpoint URL
+        <input id="endpoint-url" type="text" placeholder="https://..." />
+      </label>
 
-function getConfigFromForm() {
-  return {
-    ...clone(DEMO_CONFIG),
+      <p class="helper-text">
+        El juego enviará este payload:
+      </p>
 
-    brand: {
-      name: fields.brandName.value.trim() || DEMO_CONFIG.brand.name,
-      logoUrl: fields.brandLogo.value.trim() || DEMO_CONFIG.brand.logoUrl,
-      primaryColor: fields.brandPrimary.value || DEMO_CONFIG.brand.primaryColor,
-      secondaryColor: fields.brandSecondary.value || DEMO_CONFIG.brand.secondaryColor,
-      accentColor: fields.brandAccent.value || DEMO_CONFIG.brand.accentColor,
-      backgroundColor: fields.brandBg.value || DEMO_CONFIG.brand.backgroundColor
-    },
+      <pre>{
+  "event_name": "mundial",
+  "user_ref": "525512345678",
+  "campaign_id": "worldcup_2026_demo",
+  "team_selected": "mexico",
+  "points_awarded": 150,
+  "event_time": "2026-05-17T16:30:00.000Z"
+}</pre>
 
-    campaign: {
-      ...DEMO_CONFIG.campaign,
-      campaignId: fields.campaignId.value.trim() || DEMO_CONFIG.campaign.campaignId,
-      campaignName: fields.campaignName.value.trim() || DEMO_CONFIG.campaign.campaignName,
-      source: fields.campaignSource.value.trim() || DEMO_CONFIG.campaign.source
-    },
+      <button id="save-config-btn" class="primary-btn">
+        Guardar configuración
+      </button>
 
-    teams: clone(DEMO_CONFIG.teams),
-    wheelItems: clone(DEMO_CONFIG.wheelItems),
+      <button id="open-game-btn" class="secondary-btn">
+        Abrir juego
+      </button>
+    </section>
 
-    eventEndpoint: {
-      enabled: fields.endpointEnabled.checked,
-      url: fields.endpointUrl.value.trim()
-    }
-  };
-}
+    <section class="admin-card">
+      <p class="eyebrow">Demo URL</p>
+      <pre id="generated-url"></pre>
+    </section>
+  </main>
 
-function updatePreview(config) {
-  fields.logoPreview.src = config.brand.logoUrl;
-  fields.logoPreview.alt = `${config.brand.name} logo`;
-
-  document.documentElement.style.setProperty("--brand-primary", config.brand.primaryColor);
-  document.documentElement.style.setProperty("--brand-secondary", config.brand.secondaryColor);
-  document.documentElement.style.setProperty("--brand-accent", config.brand.accentColor);
-  document.documentElement.style.setProperty("--brand-bg", config.brand.backgroundColor);
-}
-
-function saveConfig() {
-  const config = getConfigFromForm();
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  updateGeneratedUrl(config);
-
-  alert("Configuración guardada.");
-}
-
-function encodeConfig(config) {
-  const json = JSON.stringify(config);
-  return btoa(unescape(encodeURIComponent(json)));
-}
-
-function getGameBaseUrl() {
-  const currentUrl = new URL(window.location.href);
-  const path = currentUrl.pathname.replace("admin.html", "index.html");
-  return `${currentUrl.origin}${path}`;
-}
-
-function updateGeneratedUrl(config) {
-  const encoded = encodeConfig(config);
-  const baseUrl = getGameBaseUrl();
-
-  const demoUrl =
-    `${baseUrl}?config=${encoded}` +
-    `&user_ref=525512345678` +
-    `&team=mexico` +
-    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
-
-  fields.generatedUrl.textContent = demoUrl;
-}
-
-function openGame() {
-  const config = getConfigFromForm();
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-
-  const encoded = encodeConfig(config);
-  const baseUrl = getGameBaseUrl();
-
-  const demoUrl =
-    `${baseUrl}?config=${encoded}` +
-    `&user_ref=525512345678` +
-    `&team=mexico` +
-    `&campaign_id=${encodeURIComponent(config.campaign.campaignId)}`;
-
-  window.open(demoUrl, "_blank");
-}
-
-initAdmin();
+  <script src="./config.js"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>
