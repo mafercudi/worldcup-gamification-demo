@@ -100,8 +100,20 @@
       </label>
 
       <p class="helper-text">
-        El payload seguirá el patrón: event_name, event_time, customer_id, source y user.
+        El payload seguirá este patrón:
       </p>
+
+      <pre>{
+  "event_name": "mundial_v4",
+  "event_time": "2026-05-17T23:29:49.000Z",
+  "customer_id": "+525512345678",
+  "source": "worldcup_game",
+  "user": {
+    "team_selected": "mexico",
+    "points_awarded": 150,
+    "campaign_id": "worldcup_2026_demo"
+  }
+}</pre>
 
       <button id="save-config-btn" class="primary-btn">
         Guardar configuración
@@ -115,21 +127,6 @@
     <section class="admin-card">
       <p class="eyebrow">Demo URL</p>
       <pre id="generated-url"></pre>
-    </section>
-
-    <section class="admin-card">
-      <p class="eyebrow">Payload esperado</p>
-      <pre>{
-  "event_name": "mundial",
-  "event_time": "2026-05-17T16:30:00.000Z",
-  "customer_id": "525512345678",
-  "source": "worldcup_game",
-  "user": {
-    "team_selected": "mexico",
-    "points_awarded": 150,
-    "campaign_id": "worldcup_2026_demo"
-  }
-}</pre>
     </section>
   </main>
 
